@@ -79,7 +79,7 @@ static uint64_t double_click_threshold;
 static uint64_t counts_per_second;
 static bool use_qpc;
 
-int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
+int CALLBACK wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ PWSTR lpCmdLine, _In_ int nCmdShow)
 {
 	// Limit the application to one instance.
 	const HANDLE mutex = CreateMutex(NULL, TRUE, L"{05B95384-625D-491A-A326-94758957C021}");
@@ -327,55 +327,54 @@ static void UninstallMSLLHook()
 	if (msll_hook) UnhookWindowsHookEx(msll_hook);
 }
 
-// ToDo: Add optparse wchar support to switch to wWinMain and replace atoi?
 static void ProcessCommandLineArgs()
 {
 	struct optparse_long longopts[] =
 	{
-		{ "qpc", 'q', OPTPARSE_NONE },
-		{ "threshold", 't', OPTPARSE_REQUIRED },
-		{ "left", 'l', OPTPARSE_OPTIONAL },
-		{ "right", 'r', OPTPARSE_OPTIONAL },
-		{ "middle", 'm', OPTPARSE_OPTIONAL },
-		{ "four", 'b', OPTPARSE_OPTIONAL },
-		{ "five", 'f', OPTPARSE_OPTIONAL },
+		{ L"qpc", L'q', OPTPARSE_NONE },
+		{ L"threshold", L't', OPTPARSE_REQUIRED },
+		{ L"left", L'l', OPTPARSE_OPTIONAL },
+		{ L"right", L'r', OPTPARSE_OPTIONAL },
+		{ L"middle", L'm', OPTPARSE_OPTIONAL },
+		{ L"four", L'b', OPTPARSE_OPTIONAL },
+		{ L"five", L'f', OPTPARSE_OPTIONAL },
 		{ 0 }
 	};
 
 	int option;
 	struct optparse options;
 
-	optparse_init(&options, __argv);
+	optparse_init(&options, __wargv);
 
 	while ((option = optparse_long(&options, longopts, NULL)) != -1)
 	{
 		switch (option)
 		{
-			case 'q':
+			case L'q':
 				use_qpc = true;
 				break;
-			case 't':
-				SetDoubleClickThreshold(atoi(options.optarg), MOUSE_BUTTON_COUNT);
+			case L't':
+				SetDoubleClickThreshold(_wtoi(options.optarg), MOUSE_BUTTON_COUNT);
 				break;
-			case 'l':
+			case L'l':
 				mouse_button_data[MOUSE_BUTTON_LEFT].isMonitored = true;
-				if (options.optarg) SetDoubleClickThreshold(atoi(options.optarg), MOUSE_BUTTON_LEFT);
+				if (options.optarg) SetDoubleClickThreshold(_wtoi(options.optarg), MOUSE_BUTTON_LEFT);
 				break;
-			case 'r':
+			case L'r':
 				mouse_button_data[MOUSE_BUTTON_RIGHT].isMonitored = true;
-				if (options.optarg) SetDoubleClickThreshold(atoi(options.optarg), MOUSE_BUTTON_RIGHT);
+				if (options.optarg) SetDoubleClickThreshold(_wtoi(options.optarg), MOUSE_BUTTON_RIGHT);
 				break;
-			case 'm':
+			case L'm':
 				mouse_button_data[MOUSE_BUTTON_MIDDLE].isMonitored = true;
-				if (options.optarg) SetDoubleClickThreshold(atoi(options.optarg), MOUSE_BUTTON_MIDDLE);
+				if (options.optarg) SetDoubleClickThreshold(_wtoi(options.optarg), MOUSE_BUTTON_MIDDLE);
 				break;
-			case 'b':
+			case L'b':
 				mouse_button_data[MOUSE_BUTTON_X1].isMonitored = true;
-				if (options.optarg) SetDoubleClickThreshold(atoi(options.optarg), MOUSE_BUTTON_X1);
+				if (options.optarg) SetDoubleClickThreshold(_wtoi(options.optarg), MOUSE_BUTTON_X1);
 				break;
-			case 'f':
+			case L'f':
 				mouse_button_data[MOUSE_BUTTON_X2].isMonitored = true;
-				if (options.optarg) SetDoubleClickThreshold(atoi(options.optarg), MOUSE_BUTTON_X2);
+				if (options.optarg) SetDoubleClickThreshold(_wtoi(options.optarg), MOUSE_BUTTON_X2);
 				break;
 			default:;
 		}
