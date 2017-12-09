@@ -85,7 +85,7 @@ int CALLBACK wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	const HANDLE mutex = CreateMutex(NULL, TRUE, L"{05B95384-625D-491A-A326-94758957C021}");
 	if (!mutex)
 	{
-		ShowErrorMessageBox(L"The mutex could not be created!");
+		ShowErrorMessageBox(L"The mutex could not be created!\nError code: %lu", GetLastError());
 		return EXIT_FAILURE;
 	}
 	if (GetLastError() == ERROR_ALREADY_EXISTS || GetLastError() == ERROR_ACCESS_DENIED)
@@ -103,13 +103,13 @@ int CALLBACK wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		// hWndParent is not HWND_MESSAGE because message-only windows don't receive broadcast messages like TaskbarCreated.
 		if (!CreateWindow(CLASSNAME, APPNAME, 0, 0, 0, 0, 0, NULL, NULL, hInstance, NULL))
 		{
-			ShowErrorMessageBox(L"The window couldn't be created.");
+			ShowErrorMessageBox(L"The window couldn't be created.\nError code: %lu", GetLastError());
 			PostQuitMessage(1);
 		}
 	}
 	else
 	{
-		ShowErrorMessageBox(L"The window class couldn't be registered.");
+		ShowErrorMessageBox(L"The window class couldn't be registered.\nError code: %lu", GetLastError());
 		PostQuitMessage(1);
 	}
 
@@ -128,7 +128,7 @@ int CALLBACK wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		else
 		{
 			// It's extremely unlikely that GetMessage() will return -1 but just in case try to release the important stuff.
-			ShowErrorMessageBox(L"An unknown error occured: 0x%lx", GetLastError());
+			ShowErrorMessageBox(L"An unexpected error has occured.\nError code: %lu", GetLastError());
 			UninstallMSLLHook();
 			ReleaseMutex(mutex);
 			CloseHandle(mutex);
@@ -140,7 +140,7 @@ int CALLBACK wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	ReleaseMutex(mutex);
 	CloseHandle(mutex);
 
-	// Return the exit code given in PostQuitMessage() function.
+	// Return the exit code passed to PostQuitMessage().
 	return (int)msg.wParam;
 }
 
@@ -289,7 +289,7 @@ static bool AddNotifyIcon(const HINSTANCE hInstance, const HWND hWnd, const bool
 	// Try to add the icon to the notification area...
 	if (!Shell_NotifyIcon(NIM_ADD, &notify_icon_data))
 	{
-		ShowErrorMessageBox(L"The notify icon couldn't be added.");
+		ShowErrorMessageBox(L"The notify icon couldn't be added.\nError code: %lu", GetLastError());
 		return false;
 	}
 
@@ -316,7 +316,7 @@ static bool InstallMSLLHook()
 	msll_hook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
 	if (!msll_hook)
 	{
-		ShowErrorMessageBox(L"The mouse hook couldn't be installed.");
+		ShowErrorMessageBox(L"The mouse hook couldn't be installed.\nError code: %lu", GetLastError());
 		return false;
 	}
 	return true;
@@ -480,7 +480,7 @@ static void ShowContextMenu(const HWND hWnd, const int x, const int y)
 	}
 	else
 	{
-		ShowErrorMessageBox(L"The popup menu couldn't be created. Exiting now..");
+		ShowErrorMessageBox(L"The popup menu couldn't be created.\nError code: %lu", GetLastError());
 		PostMessage(hWnd, WM_CLOSE, 0, 0);
 	}
 }
@@ -495,7 +495,7 @@ static void CDECL ShowErrorMessageBox(LPCWSTR message, ...)
 
 	// Set hWnd to NULL, so the message box will not have a owner window,
 	// which is invisible anyway. With NULL it'll also show up in the taskbar.
-	MessageBox(NULL, buffer, APPNAME, MB_OK | MB_ICONEXCLAMATION);
+	MessageBox(NULL, buffer, APPNAME, MB_OK | MB_ICONERROR);
 }
 
 static inline MouseButton GetButtonByWParam(const WPARAM wParam, const PMSLLHOOKSTRUCT pdata)
