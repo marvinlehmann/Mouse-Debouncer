@@ -5,6 +5,7 @@ A small performant Windows "tray application" which suppresses false double clic
 ## Usage
 1. Download the latest [release](https://github.com/marvinlehmann/Mouse-Debouncer/releases).
 2. Preferably create a shortcut, batch script, task, etc to set command-line options and/or to put it into the autostart.
+If you are on Windows press Windows+R, then type shell:startup, add the file.
 3. *Test and customize the thresholds for the best possible experience.*
 4. Enjoy!
 
